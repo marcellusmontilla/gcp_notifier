@@ -11,7 +11,7 @@ if [ -z "$VERSION" ]; then
 fi
 
 TAG="v$VERSION"
-NOTES="${1:-Release $TAG}"
+NOTES="${1:-Release $TAG: notebook usage docs, async examples, and robustness improvements}"
 
 echo "Tagging and releasing $TAG"
 git tag "$TAG"

@@ -4,7 +4,7 @@ gcp_notifier: Notification microservice for Email and Google Chat.
 
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-__version__ = "0.1.5"
+__version__ = "0.1.6"
 
 def get_secret(project_id: str, secret_id: str, version_id: str = "latest") -> str:
     """
