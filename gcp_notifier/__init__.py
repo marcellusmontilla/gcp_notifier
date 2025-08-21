@@ -1,9 +1,10 @@
 """
 gcp_notifier: Notification microservice for Email and Google Chat.
 """
+
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 
 def get_secret(project_id: str, secret_id: str, version_id: str = "latest") -> str:
     """
@@ -47,11 +48,10 @@ except Exception:
     GCHAT_WEBHOOK_URL = EMAIL_SENDER = EMAIL_PASSWORD = EMAIL_RECIPIENTS = None
 
 def _send_email(subject: str, message: str) -> None:
-    """Send notification email using configured SMTP credentials."""
+    """Send notification email using configured SMTP credentials (sync)."""
     try:
         import smtplib
         from email.message import EmailMessage
-
         if not EMAIL_RECIPIENTS:
             print("ERROR: EMAIL_RECIPIENTS is not set. Please add the 'EMAIL_RECIPIENTS' secret (comma-separated list of recipient email addresses) to Google Secret Manager in your GCP project.")
             return
@@ -65,13 +65,11 @@ def _send_email(subject: str, message: str) -> None:
         if not EMAIL_PASSWORD:
             print("ERROR: EMAIL_PASSWORD is not set. Please add the 'EMAIL_PASSWORD' secret (password or app password for sender) to Google Secret Manager in your GCP project.")
             return
-
         msg = EmailMessage()
         msg['From'] = EMAIL_SENDER
         msg['To'] = ", ".join(recipients)
         msg['Subject'] = subject
         msg.set_content(message)
-
         with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
             server.ehlo()
             server.starttls()
@@ -82,8 +80,43 @@ def _send_email(subject: str, message: str) -> None:
     except Exception as e:
         print(f"Failed to send email: {e}")
 
+async def _async_send_email(subject: str, message: str) -> None:
+    """Send notification email asynchronously using aiosmtplib."""
+    try:
+        import aiosmtplib
+        from email.message import EmailMessage
+        if not EMAIL_RECIPIENTS:
+            print("ERROR: EMAIL_RECIPIENTS is not set. Please add the 'EMAIL_RECIPIENTS' secret (comma-separated list of recipient email addresses) to Google Secret Manager in your GCP project.")
+            return
+        recipients = [email.strip() for email in EMAIL_RECIPIENTS.split(",") if email.strip()]
+        if not recipients:
+            print("ERROR: EMAIL_RECIPIENTS is empty. Please check the 'EMAIL_RECIPIENTS' secret in Google Secret Manager.")
+            return
+        if not EMAIL_SENDER:
+            print("ERROR: EMAIL_SENDER is not set. Please add the 'EMAIL_SENDER' secret (sender email address for Email) to Google Secret Manager in your GCP project.")
+            return
+        if not EMAIL_PASSWORD:
+            print("ERROR: EMAIL_PASSWORD is not set. Please add the 'EMAIL_PASSWORD' secret (password or app password for sender) to Google Secret Manager in your GCP project.")
+            return
+        msg = EmailMessage()
+        msg['From'] = EMAIL_SENDER
+        msg['To'] = ", ".join(recipients)
+        msg['Subject'] = subject
+        msg.set_content(message)
+        await aiosmtplib.send(
+            msg,
+            hostname=EMAIL_HOST,
+            port=EMAIL_PORT,
+            start_tls=True,
+            username=EMAIL_SENDER,
+            password=EMAIL_PASSWORD,
+        )
+        print("Async email sent successfully!")
+    except Exception as e:
+        print(f"Failed to send async email: {e}")
+
 def _send_gchat_alert(message: str) -> None:
-    """Send a notification to Google Chat via Webhook."""
+    """Send a notification to Google Chat via Webhook (sync)."""
     try:
         import requests
         if not GCHAT_WEBHOOK_URL:
@@ -99,10 +132,27 @@ def _send_gchat_alert(message: str) -> None:
     except Exception as e:
         print(f"Failed to send GChat alert: {e}")
 
+async def _async_send_gchat_alert(message: str) -> None:
+    """Send a notification to Google Chat via Webhook asynchronously using httpx."""
+    try:
+        import httpx
+        if not GCHAT_WEBHOOK_URL:
+            print("ERROR: GCHAT_WEBHOOK_URL is not set. Please add the 'GCHAT_WEBHOOK_URL' secret (Google Chat webhook URL) to Google Secret Manager in your GCP project.")
+            return
+        payload = {"text": message}
+        headers = {"Content-Type": "application/json"}
+        async with httpx.AsyncClient() as client:
+            response = await client.post(GCHAT_WEBHOOK_URL, json=payload, headers=headers)
+            if response.status_code == 200:
+                print("Async GChat alert sent successfully!")
+            else:
+                print(f"Failed to send async GChat alert: {response.text}")
+    except Exception as e:
+        print(f"Failed to send async GChat alert: {e}")
+
 def notify(subject: str, body: str, channels: list[str] = ["email", "gchat"]) -> None:
     """
-    Send a notification via email, Google Chat, or both.
-
+    Send a notification via email, Google Chat, or both (synchronous).
     Args:
         subject: The subject for email (ignored for gchat)
         body: The message body
@@ -116,10 +166,29 @@ def notify(subject: str, body: str, channels: list[str] = ["email", "gchat"]) ->
     if "gchat" in channels:
         _send_gchat_alert(body)
 
-# Expose functions for import
+async def async_notify(subject: str, body: str, channels: list[str] = ["email", "gchat"]) -> None:
+    """
+    Send a notification via email, Google Chat, or both (asynchronous).
+    Args:
+        subject: The subject for email (ignored for gchat)
+        body: The message body
+        channels: List of channels to send to ("email", "gchat")
+    """
+    if not channels:
+        print("No channels specified. Nothing to send.")
+        return
+    tasks = []
+    if "email" in channels:
+        tasks.append(_async_send_email(subject, body))
+    if "gchat" in channels:
+        tasks.append(_async_send_gchat_alert(body))
+    if tasks:
+        import asyncio
+        await asyncio.gather(*tasks)
+
 def notify_on_failure(retry_state) -> None:
     """
-    Tenacity retry_error_callback to send notification on final failure.
+    Tenacity retry_error_callback to send notification on final failure (sync).
     Usage: @retry(..., retry_error_callback=notify_on_failure)
     """
     fn_name = getattr(retry_state.fn, "__name__", str(retry_state.fn))
@@ -127,4 +196,20 @@ def notify_on_failure(retry_state) -> None:
     msg = f"Function '{fn_name}' failed after retries. Exception: {exception}"
     notify(subject=f"Failure in {fn_name}", body=msg, channels=["email", "gchat"])
 
-__all__ = ["notify", "project_id", "notify_on_failure"]
+async def async_notify_on_failure(retry_state) -> None:
+    """
+    Tenacity retry_error_callback to send notification on final failure (async).
+    Usage: @retry(..., retry_error_callback=async_notify_on_failure)
+    """
+    fn_name = getattr(retry_state.fn, "__name__", str(retry_state.fn))
+    exception = retry_state.outcome.exception() if retry_state.outcome else None
+    msg = f"Function '{fn_name}' failed after retries. Exception: {exception}"
+    await async_notify(subject=f"Failure in {fn_name}", body=msg, channels=["email", "gchat"])
+
+__all__ = [
+    "notify",
+    "async_notify",
+    "project_id",
+    "notify_on_failure",
+    "async_notify_on_failure",
+]

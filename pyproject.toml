@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gcp_notifier"
-version = "0.1.4"
+version = "0.1.5"
 description = "A simple notification library for Google Cloud projects. Sends alerts via Email and Google Chat."
 authors = [
   { name = "Marcellus Montilla", email = "marcellusmontilla@gmail.com" }
@@ -21,6 +21,10 @@ dependencies = [
 [project.optional-dependencies]
 test = [
   "pytest"
+]
+async = [
+  "aiosmtplib",
+  "httpx"
 ]
 
 [project.urls]
