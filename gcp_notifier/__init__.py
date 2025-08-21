@@ -38,12 +38,12 @@ try:
             return None
 
     GCHAT_WEBHOOK_URL = _fetch_secret_or_none("GCHAT_WEBHOOK_URL")
-    EMAIL_USER = _fetch_secret_or_none("EMAIL_USER")
+    EMAIL_SENDER = _fetch_secret_or_none("EMAIL_SENDER")
     EMAIL_PASSWORD = _fetch_secret_or_none("EMAIL_PASSWORD")
     EMAIL_RECIPIENTS = _fetch_secret_or_none("EMAIL_RECIPIENTS")
 except Exception:
     credentials, project_id = None, None
-    GCHAT_WEBHOOK_URL = EMAIL_USER = EMAIL_PASSWORD = EMAIL_RECIPIENTS = None
+    GCHAT_WEBHOOK_URL = EMAIL_SENDER = EMAIL_PASSWORD = EMAIL_RECIPIENTS = None
 
 def _send_email(subject: str, message: str) -> None:
     """Send notification email using configured SMTP credentials."""
@@ -58,9 +58,12 @@ def _send_email(subject: str, message: str) -> None:
         if not recipients:
             print("EMAIL_RECIPIENTS is empty. Cannot send email.")
             return
+        if not EMAIL_SENDER:
+            print("EMAIL_SENDER is not set. Cannot send email.")
+            return
 
         msg = EmailMessage()
-        msg['From'] = EMAIL_USER
+        msg['From'] = EMAIL_SENDER
         msg['To'] = ", ".join(recipients)
         msg['Subject'] = subject
         msg.set_content(message)
@@ -69,7 +72,7 @@ def _send_email(subject: str, message: str) -> None:
             server.ehlo()
             server.starttls()
             server.ehlo()
-            server.login(EMAIL_USER, EMAIL_PASSWORD)
+            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
             server.send_message(msg)
         print("Email sent successfully!")
     except Exception as e:

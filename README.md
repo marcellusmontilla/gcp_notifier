@@ -71,10 +71,12 @@ def my_function():
 
 1. Install the package (see Installation above).
 
-1. Add your required secrets to Google Secret Manager in your GCP project:
+2. Add your required secrets to Google Secret Manager in your GCP project:
 
 - `GCHAT_WEBHOOK_URL` (for Google Chat)
-- `EMAIL_USER`, `EMAIL_PASSWORD`, `TO_EMAIL` (for Email)
+- `EMAIL_SENDER` (sender email address for Email)
+- `EMAIL_PASSWORD` (password or app password for sender)
+- `EMAIL_RECIPIENTS` (comma-separated list of recipient email addresses)
 
 1. Import and use `notify` in your code as shown above.
 
