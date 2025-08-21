@@ -56,8 +56,11 @@ notify(
 from tenacity import retry, stop_after_attempt
 
 @retry(stop=stop_after_attempt(3), retry_error_callback=notify_on_failure)
-def my_function():
-  ...
+def always_fails():
+  # This function will always fail, triggering notify_on_failure after retries
+  raise ValueError("This is a test error for notification.")
+
+always_fails()
 ```
 
 ## Features

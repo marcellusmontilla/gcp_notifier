@@ -3,7 +3,7 @@ gcp_notifier: Notification microservice for Email and Google Chat.
 """
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 def get_secret(project_id: str, secret_id: str, version_id: str = "latest") -> str:
     """
@@ -86,7 +86,9 @@ def _send_gchat_alert(message: str) -> None:
         payload = {"text": message}
         headers = {"Content-Type": "application/json"}
         response = requests.post(GCHAT_WEBHOOK_URL, json=payload, headers=headers)
-        if response.status_code != 200:
+        if response.status_code == 200:
+            print("GChat alert sent successfully!")
+        else:
             print(f"Failed to send GChat alert: {response.text}")
     except Exception as e:
         print(f"Failed to send GChat alert: {e}")
