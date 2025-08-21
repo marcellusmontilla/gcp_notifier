@@ -3,7 +3,7 @@ gcp_notifier: Notification microservice for Email and Google Chat.
 """
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 def get_secret(project_id: str, secret_id: str, version_id: str = "latest") -> str:
     """
@@ -53,14 +53,17 @@ def _send_email(subject: str, message: str) -> None:
         from email.message import EmailMessage
 
         if not EMAIL_RECIPIENTS:
-            print("EMAIL_RECIPIENTS is not set. Cannot send email.")
+            print("ERROR: EMAIL_RECIPIENTS is not set. Please add the 'EMAIL_RECIPIENTS' secret (comma-separated list of recipient email addresses) to Google Secret Manager in your GCP project.")
             return
         recipients = [email.strip() for email in EMAIL_RECIPIENTS.split(",") if email.strip()]
         if not recipients:
-            print("EMAIL_RECIPIENTS is empty. Cannot send email.")
+            print("ERROR: EMAIL_RECIPIENTS is empty. Please check the 'EMAIL_RECIPIENTS' secret in Google Secret Manager.")
             return
         if not EMAIL_SENDER:
-            print("EMAIL_SENDER is not set. Cannot send email.")
+            print("ERROR: EMAIL_SENDER is not set. Please add the 'EMAIL_SENDER' secret (sender email address for Email) to Google Secret Manager in your GCP project.")
+            return
+        if not EMAIL_PASSWORD:
+            print("ERROR: EMAIL_PASSWORD is not set. Please add the 'EMAIL_PASSWORD' secret (password or app password for sender) to Google Secret Manager in your GCP project.")
             return
 
         msg = EmailMessage()
@@ -83,6 +86,9 @@ def _send_gchat_alert(message: str) -> None:
     """Send a notification to Google Chat via Webhook."""
     try:
         import requests
+        if not GCHAT_WEBHOOK_URL:
+            print("ERROR: GCHAT_WEBHOOK_URL is not set. Please add the 'GCHAT_WEBHOOK_URL' secret (Google Chat webhook URL) to Google Secret Manager in your GCP project.")
+            return
         payload = {"text": message}
         headers = {"Content-Type": "application/json"}
         response = requests.post(GCHAT_WEBHOOK_URL, json=payload, headers=headers)
