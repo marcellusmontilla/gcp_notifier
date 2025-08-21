@@ -14,7 +14,7 @@ pip install .
 Or add to your requirements.txt:
 
 ```
-gcp_notifier @ git+https://github.com/yourusername/gcp_notifier.git
+gcp_notifier @ git+https://github.com/marcellusmontilla/gcp_notifier.git
 ```
 
 ## Usage
