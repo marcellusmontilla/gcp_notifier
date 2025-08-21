@@ -1,4 +1,3 @@
-
 # GCP Notifier
 
 A simple notification library for Google Cloud projects. Send alerts via Email and Google Chat with a single function call. Designed to be imported and used as a Python module in your own code.
@@ -86,9 +85,11 @@ always_fails()
 
 1. Install the package (see Installation above).
 
-2. The account (personal or service) running this code must have the 'Secret Manager Secret Accessor' role in your GCP project.
+1. The account (personal or service) running this code must have the 'Secret Manager Secret Accessor' role in your GCP project.
 
-3. Add your required secrets to Google Secret Manager in your GCP project:
+1. The required secrets must be in the same GCP project where your Python script or notebook is running.
+
+1. Add your required secrets to Google Secret Manager in your GCP project:
 
 - `GCHAT_WEBHOOK_URL` (for Google Chat)
 - `EMAIL_SENDER` (sender email address for Email)
