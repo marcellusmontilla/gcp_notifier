@@ -2,6 +2,13 @@
 
 A simple notification library for Google Cloud projects. Send alerts via Email and Google Chat with a single function call. Designed to be imported and used as a Python module in your own code.
 
+## Features
+
+- Send notifications via Email and Google Chat (Webhook)
+- Unified, simple Python API: `notify(subject, body, channels)`
+- Tenacity-compatible error callback: `notify_on_failure`
+- Secrets are securely loaded from Google Secret Manager
+
 ## Installation
 
 Install from PyPI (recommended):
@@ -28,26 +35,22 @@ Or add to your requirements.txt:
 gcp_notifier @ git+https://github.com/marcellusmontilla/gcp_notifier.git
 ```
 
-## Building and Publishing
+## Quick Start
 
-This project uses a modern Python packaging workflow with `pyproject.toml`.
+1. Install the package (see Installation above).
 
-To build the package:
+2. The account (personal or service) running this code must have the 'Secret Manager Secret Accessor' role in your GCP project.
 
-```sh
-python -m pip install --upgrade build
-python -m build
-```
+3. The required secrets must be in the same GCP project where your Python script or notebook is running.
 
-To check and upload to PyPI:
+4. Add your required secrets to Google Secret Manager in your GCP project:
 
-```sh
-python -m pip install --upgrade twine
-twine check dist/*
-twine upload dist/*
-```
+   - `GCHAT_WEBHOOK_URL` (for Google Chat)
+   - `EMAIL_SENDER` (sender email address for Email)
+   - `EMAIL_PASSWORD` (password or app password for sender)
+   - `EMAIL_RECIPIENTS` (comma-separated list of recipient email addresses)
 
-See [Python Packaging User Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/) for more details.
+5. Import and use `notify` in your code as shown below.
 
 ## Usage
 
@@ -74,29 +77,26 @@ def always_fails():
 always_fails()
 ```
 
-## Features
+## Building and Publishing
 
-- Send notifications via Email and Google Chat (Webhook)
-- Unified, simple Python API: `notify(subject, body, channels)`
-- Tenacity-compatible error callback: `notify_on_failure`
-- Secrets are securely loaded from Google Secret Manager
+This project uses a modern Python packaging workflow with `pyproject.toml`.
 
-## Quick Start
+To build the package:
 
-1. Install the package (see Installation above).
+```sh
+python -m pip install --upgrade build
+python -m build
+```
 
-1. The account (personal or service) running this code must have the 'Secret Manager Secret Accessor' role in your GCP project.
+To check and upload to PyPI:
 
-1. The required secrets must be in the same GCP project where your Python script or notebook is running.
+```sh
+python -m pip install --upgrade twine
+twine check dist/*
+twine upload dist/*
+```
 
-1. Add your required secrets to Google Secret Manager in your GCP project:
-
-- `GCHAT_WEBHOOK_URL` (for Google Chat)
-- `EMAIL_SENDER` (sender email address for Email)
-- `EMAIL_PASSWORD` (password or app password for sender)
-- `EMAIL_RECIPIENTS` (comma-separated list of recipient email addresses)
-
-1. Import and use `notify` in your code as shown above.
+See [Python Packaging User Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/) for more details.
 
 ## License
 
