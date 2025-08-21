@@ -1,5 +1,7 @@
 # GCP Notifier
 
+[![Upload Python Package](https://github.com/marcellusmontilla/gcp_notifier/actions/workflows/python-publish.yml/badge.svg)](https://github.com/marcellusmontilla/gcp_notifier/actions/workflows/python-publish.yml)
+
 A simple notification library for Google Cloud projects. Send alerts via Email and Google Chat with a single function call. Designed to be imported and used as a Python module in your own code.
 
 ## Features
