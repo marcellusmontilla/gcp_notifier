@@ -30,13 +30,14 @@ always_fails()
 
 ## Async Usage
 
-You can send notifications asynchronously using the async API:
+You can send notifications asynchronously using the async API.
+
+### Async notify example
 
 ```python
-import asyncio
-from gcp_notifier import async_notify, async_notify_on_failure
+import asyncio  # only if running a script, otherwise, do not import
+from gcp_notifier import async_notify
 
-# Send a notification asynchronously
 async def main():
   await async_notify(
     subject="Async Alert",
@@ -44,16 +45,25 @@ async def main():
     channels=["email", "gchat"]
   )
 
-asyncio.run(main())
+asyncio.run(main()) # if running a script
+await main()        # if using a notebook
+```
 
-# Use as tenacity retry_error_callback (async)
+---
+
+### Async tenacity error callback example
+
+```python
+import asyncio  # only if running a script, otherwise, do not import
+from gcp_notifier import async_notify_on_failure
 from tenacity import retry, stop_after_attempt
 
 @retry(stop=stop_after_attempt(3), retry_error_callback=async_notify_on_failure)
 async def always_fails_async():
   raise ValueError("This is a test error for async notification.")
 
-asyncio.run(always_fails_async())
+asyncio.run(always_fails_async())   # if running a script
+await always_fails_async()          # if using a notebook
 ```
 
 ## Installation
