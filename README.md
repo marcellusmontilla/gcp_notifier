@@ -29,7 +29,13 @@ Or, for local development:
 pip install .
 ```
 
-Or add to your requirements.txt:
+Or add to your requirements.txt (recommended for PyPI):
+
+```text
+gcp-notifier
+```
+
+For development versions from GitHub (not recommended for production):
 
 ```text
 gcp_notifier @ git+https://github.com/marcellusmontilla/gcp_notifier.git
