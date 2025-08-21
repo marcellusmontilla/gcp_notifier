@@ -13,9 +13,30 @@ pip install .
 
 Or add to your requirements.txt:
 
-```
+```text
 gcp_notifier @ git+https://github.com/marcellusmontilla/gcp_notifier.git
 ```
+
+## Building and Publishing
+
+This project uses a modern Python packaging workflow with `pyproject.toml`.
+
+To build the package:
+
+```sh
+python -m pip install --upgrade build
+python -m build
+```
+
+To check and upload to PyPI:
+
+```sh
+python -m pip install --upgrade twine
+twine check dist/*
+twine upload dist/*
+```
+
+See [Python Packaging User Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/) for more details.
 
 ## Usage
 
