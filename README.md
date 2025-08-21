@@ -5,7 +5,19 @@ A simple notification library for Google Cloud projects. Send alerts via Email a
 
 ## Installation
 
-Install from source:
+Install from PyPI (recommended):
+
+```sh
+pip install gcp-notifier
+```
+
+Or, to test the latest version from TestPyPI:
+
+```sh
+pip install -i https://test.pypi.org/simple/ gcp-notifier
+```
+
+Or, for local development:
 
 ```sh
 pip install .
@@ -74,7 +86,9 @@ always_fails()
 
 1. Install the package (see Installation above).
 
-2. Add your required secrets to Google Secret Manager in your GCP project:
+2. The account (personal or service) running this code must have the 'Secret Manager Secret Accessor' role in your GCP project.
+
+3. Add your required secrets to Google Secret Manager in your GCP project:
 
 - `GCHAT_WEBHOOK_URL` (for Google Chat)
 - `EMAIL_SENDER` (sender email address for Email)
