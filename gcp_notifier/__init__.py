@@ -40,10 +40,10 @@ try:
     GCHAT_WEBHOOK_URL = _fetch_secret_or_none("GCHAT_WEBHOOK_URL")
     EMAIL_USER = _fetch_secret_or_none("EMAIL_USER")
     EMAIL_PASSWORD = _fetch_secret_or_none("EMAIL_PASSWORD")
-    TO_EMAIL = _fetch_secret_or_none("TO_EMAIL")
+    EMAIL_RECIPIENTS = _fetch_secret_or_none("EMAIL_RECIPIENTS")
 except Exception:
     credentials, project_id = None, None
-    GCHAT_WEBHOOK_URL = EMAIL_USER = EMAIL_PASSWORD = TO_EMAIL = None
+    GCHAT_WEBHOOK_URL = EMAIL_USER = EMAIL_PASSWORD = EMAIL_RECIPIENTS = None
 
 def _send_email(subject: str, message: str) -> None:
     """Send notification email using configured SMTP credentials."""
@@ -51,9 +51,17 @@ def _send_email(subject: str, message: str) -> None:
         import smtplib
         from email.message import EmailMessage
 
+        if not EMAIL_RECIPIENTS:
+            print("EMAIL_RECIPIENTS is not set. Cannot send email.")
+            return
+        recipients = [email.strip() for email in EMAIL_RECIPIENTS.split(",") if email.strip()]
+        if not recipients:
+            print("EMAIL_RECIPIENTS is empty. Cannot send email.")
+            return
+
         msg = EmailMessage()
         msg['From'] = EMAIL_USER
-        msg['To'] = TO_EMAIL
+        msg['To'] = ", ".join(recipients)
         msg['Subject'] = subject
         msg.set_content(message)
 
