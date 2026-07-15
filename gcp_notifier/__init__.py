@@ -5,7 +5,7 @@ from typing import Optional
 
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-__version__ = "0.1.7"
+__version__ = "0.1.8"
 
 def get_secret(secret_id: str, project_id: str = "", version_id: str = "latest") -> str:
     """

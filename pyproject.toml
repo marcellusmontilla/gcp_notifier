@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gcp_notifier"
-version = "0.1.7"
+version = "0.1.8"
 description = "Read Google Secret Manager values and send Email / Google Chat alerts from GCP projects and notebooks, with automatic project detection."
 authors = [
   { name = "Marcellus Montilla", email = "marcellusmontilla@gmail.com" }
