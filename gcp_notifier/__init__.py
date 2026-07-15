@@ -4,20 +4,35 @@ gcp_notifier: Notification microservice for Email and Google Chat.
 
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 
-def get_secret(project_id: str, secret_id: str, version_id: str = "latest") -> str:
+def get_secret(secret_id: str, project_id: str = "", version_id: str = "latest") -> str:
     """
     Retrieve a secret from Google Secret Manager.
 
     Args:
-        project_id: GCP project ID
-        secret_id: Secret ID in Secret Manager
-        version_id: Version of the secret to retrieve
+        secret_id: Secret ID in Secret Manager.
+        project_id: GCP project ID. Defaults to the project detected from
+            the ambient credentials (google.auth.default()).
+        version_id: Version of the secret to retrieve.
 
     Returns:
-        The secret value as a string
+        The secret value as a string.
+
+    Raises:
+        ValueError: If secret_id is empty, or no project_id is given and
+            none could be detected from the environment.
     """
+    if not secret_id:
+        raise ValueError("secret_id must be a non-empty string.")
+    if not project_id:
+        project_id = globals().get("project_id") or ""
+    if not project_id:
+        raise ValueError(
+            "No GCP project ID provided and none could be detected. "
+            "Pass project_id explicitly, or run where "
+            "google.auth.default() can resolve a project."
+        )
     from google.cloud import secretmanager
     client = secretmanager.SecretManagerServiceClient()
     name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
@@ -34,7 +49,7 @@ try:
         if not project_id:
             return None
         try:
-            return get_secret(project_id, secret_id)
+            return get_secret(secret_id, project_id)
         except Exception as e:
             print(f"Failed to fetch secret '{secret_id}': {e}")
             return None
@@ -209,6 +224,7 @@ async def async_notify_on_failure(retry_state) -> None:
 __all__ = [
     "notify",
     "async_notify",
+    "get_secret",
     "project_id",
     "notify_on_failure",
     "async_notify_on_failure",

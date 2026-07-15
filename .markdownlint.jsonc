@@ -1,0 +1,6 @@
+{
+  // Keep a Changelog repeats section headings (Added, Changed, Fixed)
+  // under each version by design. Restrict MD024 to sibling headings so
+  // those repeats are allowed while same-level duplicates are still caught.
+  "MD024": { "siblings_only": true }
+}

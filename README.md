@@ -66,6 +66,30 @@ asyncio.run(always_fails_async())   # if running a script
 await always_fails_async()          # if using a notebook
 ```
 
+## Retrieving Secrets
+
+The same Secret Manager access the library uses internally is exposed as a
+public helper. `project_id` defaults to the project detected from the
+ambient credentials (`google.auth.default()`), so in most cases you only
+pass the secret ID.
+
+```python
+from gcp_notifier import get_secret
+
+# Uses the auto-detected project
+api_key = get_secret("MY_API_KEY")
+
+# Or target a specific project / version explicitly
+db_password = get_secret(
+    "DB_PASSWORD",
+    project_id="my-other-project",
+    version_id="3",
+)
+```
+
+Raises `ValueError` if `secret_id` is empty, or if no `project_id` is
+provided and none can be detected from the environment.
+
 ## Installation
 
 Install from PyPI (recommended):
@@ -74,7 +98,8 @@ Install from PyPI (recommended):
 pip install gcp-notifier
 ```
 
-For async features (async_notify, async_notify_on_failure), install with the optional async dependencies:
+For async features (async_notify, async_notify_on_failure), install with
+the optional async dependencies:
 
 ```sh
 pip install 'gcp-notifier[async]'
@@ -86,9 +111,11 @@ This will install the package plus the required async libraries (aiosmtplib, htt
 
 1. Install the package (see Installation above).
 
-2. The account (personal or service) running this code must have the 'Secret Manager Secret Accessor' role in your GCP project.
+2. The account (personal or service) running this code must have the
+   'Secret Manager Secret Accessor' role in your GCP project.
 
-3. The required secrets must be in the same GCP project where your Python script or notebook is running.
+3. The required secrets must be in the same GCP project where your
+   Python script or notebook is running.
 
 4. Add your required secrets to Google Secret Manager in your GCP project:
 
@@ -118,7 +145,13 @@ twine check dist/*
 twine upload dist/*
 ```
 
-See [Python Packaging User Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/) for more details.
+See the [Python Packaging User Guide][packaging] for more details.
+
+[packaging]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the release history.
 
 ## License
 
