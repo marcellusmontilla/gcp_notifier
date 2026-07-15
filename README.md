@@ -3,6 +3,13 @@
 
 [![Upload Python Package](https://github.com/marcellusmontilla/gcp_notifier/actions/workflows/python-publish.yml/badge.svg)](https://github.com/marcellusmontilla/gcp_notifier/actions/workflows/python-publish.yml)
 
+Read Google Secret Manager values and send Email / Google Chat alerts
+from GCP projects and notebooks (Jupyter, Colab, Vertex AI Workbench).
+The project is auto-detected from the ambient credentials, so
+`get_secret("MY_SECRET")` is usually all you need. It wraps the official
+`google-cloud-secret-manager` SDK; its value is the project auto-detection
+and the one-line call.
+
 ## Synchronous Usage
 
 Import and use in your Python code:
@@ -89,6 +96,38 @@ db_password = get_secret(
 
 Raises `ValueError` if `secret_id` is empty, or if no `project_id` is
 provided and none can be detected from the environment.
+
+## Secrets in Notebooks
+
+`get_secret` is designed to work from notebooks. Importing the package
+does not fetch any notification secrets, so it stays quiet even when only
+secret access is needed. You only need credentials the project can be
+detected from.
+
+In Google Colab, authenticate the interactive user first:
+
+```python
+from google.colab import auth
+auth.authenticate_user()
+
+from gcp_notifier import get_secret
+
+api_key = get_secret("MY_API_KEY")
+```
+
+On Vertex AI Workbench, or local Jupyter using Application Default
+Credentials, the credentials are already present (run
+`gcloud auth application-default login` once locally), so no auth call is
+needed:
+
+```python
+from gcp_notifier import get_secret
+
+api_key = get_secret("MY_API_KEY")
+```
+
+The account behind those credentials needs the `Secret Manager Secret
+Accessor` role on the project (see Quick Start below).
 
 ## Installation
 

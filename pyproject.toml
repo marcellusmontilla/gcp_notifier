@@ -5,13 +5,41 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "gcp_notifier"
 version = "0.1.7"
-description = "A simple notification library for Google Cloud projects. Sends alerts via Email and Google Chat."
+description = "Read Google Secret Manager values and send Email / Google Chat alerts from GCP projects and notebooks, with automatic project detection."
 authors = [
   { name = "Marcellus Montilla", email = "marcellusmontilla@gmail.com" }
 ]
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
+keywords = [
+  "gcp",
+  "google-cloud",
+  "secret-manager",
+  "secrets",
+  "jupyter",
+  "notebook",
+  "colab",
+  "notifications",
+  "email",
+  "google-chat",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Framework :: Jupyter",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Security",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: System :: Systems Administration",
+]
 dependencies = [
   "google-cloud-secret-manager",
   "google-auth",

@@ -18,6 +18,24 @@ adheres to [Semantic Versioning][semver].
   pass `project_id` and `version_id` explicitly.
 - `get_secret` raises `ValueError` when `secret_id` is empty, or when
   no project ID is provided and none can be detected.
+- Notebook usage documentation for reading secrets from Colab, Vertex AI
+  Workbench, and local Jupyter.
+- PyPI keywords and classifiers so the package is discoverable for
+  Secret Manager and notebook use cases.
+
+### Changed
+
+- Notification secrets (`GCHAT_WEBHOOK_URL`, `EMAIL_SENDER`,
+  `EMAIL_PASSWORD`, `EMAIL_RECIPIENTS`) are now fetched lazily on the
+  first `notify` / `async_notify` call instead of at import. Importing
+  the package for `get_secret` alone no longer prints "Failed to fetch
+  secret" errors when the notification secrets are absent.
+
+### Fixed
+
+- Corrected the minimum supported Python to 3.9. The code already
+  required it (it uses `list[str]` annotations), so the previous `>=3.8`
+  claim was inaccurate.
 
 ## [0.1.6] - 2025-08-21
 

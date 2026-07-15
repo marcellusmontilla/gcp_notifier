@@ -52,3 +52,27 @@ def test_get_secret_falls_back_to_detected_project(monkeypatch) -> None:
             )
         }
     )
+
+
+def test_get_notification_secret_swallows_errors(monkeypatch) -> None:
+    """A failed secret fetch returns None rather than raising."""
+    def boom(secret_id: str) -> str:
+        raise RuntimeError("no access")
+
+    monkeypatch.setattr(gcp_notifier, "get_secret", boom)
+    assert gcp_notifier._get_notification_secret("X") is None
+
+
+def test_notify_fetches_notification_secret_lazily(monkeypatch) -> None:
+    """notify() resolves its secret at call time via get_secret."""
+    calls = []
+
+    def fake_get_secret(secret_id: str, *args, **kwargs) -> str:
+        calls.append(secret_id)
+        return ""  # falsy: hits the "not set" path, no network call
+
+    monkeypatch.setattr(gcp_notifier, "get_secret", fake_get_secret)
+    gcp_notifier.notify(subject="s", body="b", channels=["gchat"])
+    assert "GCHAT_WEBHOOK_URL" in calls, (
+        "gchat webhook should be fetched at notify() time, not at import"
+    )

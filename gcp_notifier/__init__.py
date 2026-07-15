@@ -1,6 +1,7 @@
 """
 gcp_notifier: Notification microservice for Email and Google Chat.
 """
+from typing import Optional
 
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
@@ -40,33 +41,31 @@ def get_secret(secret_id: str, project_id: str = "", version_id: str = "latest")
     secret_value = response.payload.data.decode("UTF-8")
     return secret_value
 
-# Detect GCP project and fetch secrets
+# Detect the active GCP project from the ambient credentials. Notification
+# secrets are fetched lazily on first use (see _get_notification_secret),
+# so importing this package just for get_secret stays quiet even when the
+# notification secrets are absent.
 try:
     import google.auth
     credentials, project_id = google.auth.default()
-
-    def _fetch_secret_or_none(secret_id: str) -> str:
-        if not project_id:
-            return None
-        try:
-            return get_secret(secret_id, project_id)
-        except Exception as e:
-            print(f"Failed to fetch secret '{secret_id}': {e}")
-            return None
-
-    GCHAT_WEBHOOK_URL = _fetch_secret_or_none("GCHAT_WEBHOOK_URL")
-    EMAIL_SENDER = _fetch_secret_or_none("EMAIL_SENDER")
-    EMAIL_PASSWORD = _fetch_secret_or_none("EMAIL_PASSWORD")
-    EMAIL_RECIPIENTS = _fetch_secret_or_none("EMAIL_RECIPIENTS")
 except Exception:
     credentials, project_id = None, None
-    GCHAT_WEBHOOK_URL = EMAIL_SENDER = EMAIL_PASSWORD = EMAIL_RECIPIENTS = None
+
+def _get_notification_secret(secret_id: str) -> Optional[str]:
+    """Fetch a notification secret, returning None if it is unavailable."""
+    try:
+        return get_secret(secret_id)
+    except Exception:
+        return None
 
 def _send_email(subject: str, message: str) -> None:
     """Send notification email using configured SMTP credentials (sync)."""
     try:
         import smtplib
         from email.message import EmailMessage
+        EMAIL_RECIPIENTS = _get_notification_secret("EMAIL_RECIPIENTS")
+        EMAIL_SENDER = _get_notification_secret("EMAIL_SENDER")
+        EMAIL_PASSWORD = _get_notification_secret("EMAIL_PASSWORD")
         if not EMAIL_RECIPIENTS:
             print("ERROR: EMAIL_RECIPIENTS is not set. Please add the 'EMAIL_RECIPIENTS' secret (comma-separated list of recipient email addresses) to Google Secret Manager in your GCP project.")
             return
@@ -100,6 +99,9 @@ async def _async_send_email(subject: str, message: str) -> None:
     try:
         import aiosmtplib
         from email.message import EmailMessage
+        EMAIL_RECIPIENTS = _get_notification_secret("EMAIL_RECIPIENTS")
+        EMAIL_SENDER = _get_notification_secret("EMAIL_SENDER")
+        EMAIL_PASSWORD = _get_notification_secret("EMAIL_PASSWORD")
         if not EMAIL_RECIPIENTS:
             print("ERROR: EMAIL_RECIPIENTS is not set. Please add the 'EMAIL_RECIPIENTS' secret (comma-separated list of recipient email addresses) to Google Secret Manager in your GCP project.")
             return
@@ -134,6 +136,7 @@ def _send_gchat_alert(message: str) -> None:
     """Send a notification to Google Chat via Webhook (sync)."""
     try:
         import requests
+        GCHAT_WEBHOOK_URL = _get_notification_secret("GCHAT_WEBHOOK_URL")
         if not GCHAT_WEBHOOK_URL:
             print("ERROR: GCHAT_WEBHOOK_URL is not set. Please add the 'GCHAT_WEBHOOK_URL' secret (Google Chat webhook URL) to Google Secret Manager in your GCP project.")
             return
@@ -151,6 +154,7 @@ async def _async_send_gchat_alert(message: str) -> None:
     """Send a notification to Google Chat via Webhook asynchronously using httpx."""
     try:
         import httpx
+        GCHAT_WEBHOOK_URL = _get_notification_secret("GCHAT_WEBHOOK_URL")
         if not GCHAT_WEBHOOK_URL:
             print("ERROR: GCHAT_WEBHOOK_URL is not set. Please add the 'GCHAT_WEBHOOK_URL' secret (Google Chat webhook URL) to Google Secret Manager in your GCP project.")
             return
