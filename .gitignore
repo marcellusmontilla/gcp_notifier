@@ -76,8 +76,6 @@ coverage.xml
 # Ignore MANIFEST
 MANIFEST
 
-.github/
-
-
 #Ignore vscode AI rules
-.github/instructions/codacy.instructions.md
+.github/copilot-instructions.md
+.github/instructions/
